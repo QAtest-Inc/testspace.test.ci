@@ -17,9 +17,6 @@ steps:
 - task: DockerInstaller@0
   inputs:
     dockerVersion: '17.09.0-ce'
-- task: Ensure tests have executed.@0
-  inputs:
-    minNumOfExpectedTests: 0.1.2
 
 - task: GitHubRelease@1
   inputs:
