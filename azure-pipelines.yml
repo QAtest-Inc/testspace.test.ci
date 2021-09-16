@@ -6,17 +6,9 @@ pool: Default
 
 steps:
 - script: |
-    pipevn install -dev
-  displayName: 'Install dependencies'
-
-- script: |
-    pipenv install pytest pytest-azurepipelines
-    pipenv shell
+    sudo pip install pytest
     py.test generate-results.py --junitxml=results.xml -v --tb=no
   displayName: 'pytest'
-
-
-
 
 - task: KubectlInstaller@0
   inputs:
@@ -25,9 +17,18 @@ steps:
 - task: DockerInstaller@0
   inputs:
     dockerVersion: '17.09.0-ce'
-- task: PythonScript@0
+- task: Ensure tests have executed.@0
   inputs:
-    scriptSource: 'inline'
-    script: |
-      sudo pip install pytest
-      py.test generate-results.py --junitxml=results.xml -v --tb=no
+    minNumOfExpectedTests: 1
+
+- task: GitHubRelease@1
+  inputs:
+    gitHubConnection: 'github.com_qause'
+    repositoryName: 'QAtest-Inc/testspace.test.ci'
+    action: 'create'
+    target: '$(Build.SourceVersion)'
+    tagSource: 'gitTag'
+    isDraft: true
+    isPreRelease: true
+    changeLogCompareToRelease: 'lastFullRelease'
+    changeLogType: 'commitBased'
